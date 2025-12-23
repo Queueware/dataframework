@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <CompanyName>Queueware</CompanyName>
+
+    <RootNamespace>$(CompanyName).$(MSBuildProjectName)</RootNamespace>
+
+    <AssemblyName>$(CompanyName).$(MSBuildProjectName)</AssemblyName>
+  </PropertyGroup>
+</Project>
