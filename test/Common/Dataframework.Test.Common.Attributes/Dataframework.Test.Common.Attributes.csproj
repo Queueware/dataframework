@@ -7,8 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutoFixture" />
-      <PackageReference Include="FluentAssertions" />
+      <Reference Include="nunit.framework">
+        <HintPath>..\..\..\..\..\..\..\.nuget\packages\nunit\4.4.0\lib\net8.0\nunit.framework.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
