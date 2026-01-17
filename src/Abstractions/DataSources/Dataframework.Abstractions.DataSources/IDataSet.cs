@@ -41,6 +41,17 @@ public interface IDataSet<TEntity> where TEntity : class
     /// A token to observe while waiting for the operation to complete.
     /// </param>
     Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken);
+    
+    /// <summary>
+    /// Returns the total number of entities.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// A token to observe while waiting for the operation to complete.
+    /// </param>
+    /// <returns>
+    /// Returns the total number of entities.
+    /// </returns>
+    Task<int> CountAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Returns the number of entities that satisfy the specified predicate.

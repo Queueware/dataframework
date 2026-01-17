@@ -11,8 +11,30 @@ namespace Queueware.Dataframework.Test.Unit.Infrastructure.Infrastructure.Reposi
 [TestFixture]
 public class RepositoryShould : RepositoryTestFixture
 {
+    [TestCaseShift(3)]
+    public async Task CountAsync(bool isOne, bool isMany, bool isAll)
+    {
+        // Arrange
+        var removalMax = isOne ? RepositoryEntities.Count - 1 :
+            isMany ? RepositoryEntities.Count / 2 :
+            isAll ? RepositoryEntities.Count : 0;
+        RepositoryEntities[..removalMax]
+            .ForEach(entity => MockDataSource.Remove<string, MockDataType1>(entity));
+
+        var expectedResult = MockDataSource.Get<string, MockDataType1>().Count();
+        int? result = null;
+
+        // Act (define)
+        var countAsync = async () => result = await Repository.CountAsync(CancellationToken);
+
+        // Assert
+        await countAsync.Should().NotThrowAsync();
+        result.Should().Be(expectedResult);
+        VerifyDataContextCreationAndDisposalCalls(1);
+    }
+    
     [TestCaseRange(0, 2)]
-    public async Task CountAsync(int expectedResult)
+    public async Task CountAsync_By_Expression(int expectedResult)
     {
         // Arrange
         var name = Create<string>();

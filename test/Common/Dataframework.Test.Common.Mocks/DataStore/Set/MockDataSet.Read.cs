@@ -11,6 +11,11 @@ public partial class MockDataSet<TEntity> where TEntity : class
             .Invoke(MockDataSource, []) as IEnumerable<TEntity> ?? []).AsQueryable();
     }
 
+    public Task<int> CountAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<int> CountAsync(Expression<Func<TEntity, bool>> expression, CancellationToken cancellationToken)
     {
         var boundWhereResult = _mockDataSourceBinder.CreateMockDataSourceWhereBinding<TEntity>()

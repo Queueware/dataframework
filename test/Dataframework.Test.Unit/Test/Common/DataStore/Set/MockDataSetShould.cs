@@ -125,9 +125,26 @@ public class MockDataSetShould : MockDataSetTestFixture
         getNullEntities.Should().NotThrow();
         addedResults.Should().BeEmpty();
     }
-
+    
     [TestCaseRange(0, 2)]
     public async Task CountAsync(int expectedResult)
+    {
+        // Arrange
+        DataSourceEntities = DataSourceEntities[..expectedResult];
+        MockDataSource.Add<string, MockDataType1>(DataSourceEntities);
+        
+        int? result = null;
+
+        // Act (define)
+        var countAsync = async () => result = await MockDataSet.CountAsync(CancellationToken);
+
+        // Assert
+        await countAsync.Should().NotThrowAsync();
+        result.Should().Be(expectedResult);
+    }
+
+    [TestCaseRange(0, 2)]
+    public async Task CountAsync_By_Expression(int expectedResult)
     {
         // Arrange
         var name = Create<string>();
