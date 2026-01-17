@@ -37,9 +37,9 @@ public abstract class RepositoryTestFixture : CommonTestBase
         Repository = new Repository<string, MockDataType1, IDataContext>(MockDataContextFactory);
     }
 
-    protected void VerifyDataContextCreationAndDisposalCalls()
+    protected void VerifyDataContextCreationAndDisposalCalls(int callCount)
     {
-        MockDataContextFactory.State.CreateDataContextCallCount.Should().Be(1);
-        MockDataContext.State.DisposeCallCount.Should().Be(1);
+        MockDataContextFactory.State.CreateDataContextCallCount.Should().Be(callCount);
+        MockDataContext.State.DisposeCallCount.Should().Be(callCount);
     }
 }

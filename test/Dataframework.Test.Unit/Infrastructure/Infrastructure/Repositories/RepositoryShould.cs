@@ -30,13 +30,13 @@ public class RepositoryShould : RepositoryTestFixture
         // Assert
         await countAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
     }
 
     [TestCase(false, false)]
     [TestCase(true, false)]
     [TestCase(true, true)]
-    public async Task DeleteAsync_Of_One(bool isFound, bool isDeleted)
+    public async Task DeleteAsync_Of_One_Id(bool isFound, bool isDeleted)
     {
         // Arrange
         var entityToRemove = RepositoryEntities.First();
@@ -53,13 +53,13 @@ public class RepositoryShould : RepositoryTestFixture
         await deleteAsync.Should().NotThrowAsync();
         result.Should().Be(isDeleted);
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(isFound));
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
         get.Should().NotThrow();
         entityPostRemove.Should().BeNull();
     }
-
+    
     [TestCaseShift(3)]
-    public async Task DeleteAsync_Of_Many(bool isOne, bool isMany, bool isAll)
+    public async Task DeleteAsync_Of_Many_Ids(bool isOne, bool isMany, bool isAll)
     {
         // Arrange
         var ids = TestArrangementHelper.GetRangeFrom(RepositoryEntities, isOne, isMany, isAll).Select(entity => entity.Id);
@@ -77,13 +77,13 @@ public class RepositoryShould : RepositoryTestFixture
         await deleteAsync.Should().NotThrowAsync();
         result.Should().Be(shouldSaveChanges);
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(saveChangeCount);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(saveChangeCount);
         where.Should().NotThrow();
         entitiesPostRemove.Should().BeEmpty();
     }
 
     [TestCaseShift(3)]
-    public async Task DeleteAsync_Of_Many_When_Found(bool isOneFound, bool isManyFound, bool isAllFound)
+    public async Task DeleteAsync_Of_Many_Ids_When_Found(bool isOneFound, bool isManyFound, bool isAllFound)
     {
         // Arrange
         var entitiesFound = TestArrangementHelper.GetRangeFrom(RepositoryEntities, isOneFound, isManyFound, isAllFound);
@@ -103,10 +103,89 @@ public class RepositoryShould : RepositoryTestFixture
         await deleteAsync.Should().NotThrowAsync();
         result.Should().Be(isAllFound);
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(isOneFound || isManyFound || isAllFound));
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
         where.Should().NotThrow();
         entitiesPostRemove.Should().BeEmpty();
     }
+    
+    [TestCase(false, false)]
+    [TestCase(true, false)]
+    [TestCase(true, true)]
+    public async Task DeleteAsync_Of_One_Entity(bool isFound, bool isDeleted)
+    {
+        // Arrange
+        var entityToRemove = RepositoryEntities.First();
+        var id = isFound ? entityToRemove.Id : Create<string>();
+        entityToRemove.Id = id;
+        MockDataContext.State.SaveChangesAsyncReturnValue = Convert.ToInt32(isDeleted);
+        MockDataType1? entityPostRemove = null;
+        bool? result = null;
+
+        // Act (define)
+        var deleteAsync = async () => result = await Repository.DeleteAsync(entityToRemove, CancellationToken);
+        var get = () => entityPostRemove = MockDataSource.Get<string, MockDataType1>(id);
+
+        // Assert
+        await deleteAsync.Should().NotThrowAsync();
+        result.Should().Be(isDeleted);
+        MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(isFound));
+        VerifyDataContextCreationAndDisposalCalls(1);
+        get.Should().NotThrow();
+        entityPostRemove.Should().BeNull();
+    }
+    
+    [TestCaseShift(3)]
+    public async Task DeleteAsync_Of_Many_Entities(bool isOne, bool isMany, bool isAll)
+    {
+        // Arrange
+        var entitiesToRemove = TestArrangementHelper.GetRangeFrom(RepositoryEntities, isOne, isMany, isAll).ToList();
+        var ids = entitiesToRemove.Select(entity => entity.Id);
+        var shouldSaveChanges = isOne || isMany || isAll;
+        var saveChangeCount = Convert.ToInt32(shouldSaveChanges);
+        MockDataContext.State.SaveChangesAsyncReturnValue = saveChangeCount;
+        IEnumerable<MockDataType1>? entitiesPostRemove = null;
+        bool? result = null;
+
+        // Act (define)
+        var deleteAsync = async () => result = await Repository.DeleteAsync(entitiesToRemove, CancellationToken);
+        var where = () => entitiesPostRemove = MockDataSource.Where<string, MockDataType1>(entity => ids.Contains(entity.Id));
+
+        // Assert
+        await deleteAsync.Should().NotThrowAsync();
+        result.Should().Be(shouldSaveChanges);
+        MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(saveChangeCount);
+        VerifyDataContextCreationAndDisposalCalls(saveChangeCount);
+        where.Should().NotThrow();
+        entitiesPostRemove.Should().BeEmpty();
+    }
+    
+    [TestCaseShift(3)]
+    public async Task DeleteAsync_Of_Many_Entities_When_Found(bool isOneFound, bool isManyFound, bool isAllFound)
+    {
+        // Arrange
+        var entitiesFound = TestArrangementHelper.GetRangeFrom(RepositoryEntities, isOneFound, isManyFound, isAllFound);
+        var entitiesNotFound = RepositoryEntities.ExceptBy(entitiesFound.Select(entity => entity.Id), entity => entity.Id);
+        MockDataSource.Remove<string, MockDataType1>(entitiesNotFound);
+        var entitiesToRemove = RepositoryEntities;
+        var ids = entitiesToRemove.Select(entity => entity.Id);
+        MockDataContext.State.SaveChangesAsyncReturnValue = Convert.ToInt32(isAllFound);
+
+        IEnumerable<MockDataType1>? entitiesPostRemove = null;
+        bool? result = null;
+
+        // Act (define)
+        var deleteAsync = async () => result = await Repository.DeleteAsync(entitiesToRemove, CancellationToken);
+        var where = () => entitiesPostRemove = MockDataSource.Where<string, MockDataType1>(entity => ids.Contains(entity.Id));
+
+        // Assert
+        await deleteAsync.Should().NotThrowAsync();
+        result.Should().Be(isAllFound);
+        MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(isOneFound || isManyFound || isAllFound));
+        VerifyDataContextCreationAndDisposalCalls(1);
+        where.Should().NotThrow();
+        entitiesPostRemove.Should().BeEmpty();
+    }
+
 
     [TestCaseShift(3)]
     public async Task Get_FirstOrDefaultAsync(bool doesOneMatch, bool doManyMatch, bool doAllMatch)
@@ -132,7 +211,7 @@ public class RepositoryShould : RepositoryTestFixture
             resultShould.NotBeSameAs(expectedResult);
         }
         resultShould.BeEquivalentTo(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
     }
 
     [TestCase(false)]
@@ -159,7 +238,7 @@ public class RepositoryShould : RepositoryTestFixture
         await insertAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(expectedSaveChangesAsyncCallCount);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
         where.Should().NotThrow();
         entitiesPostInsert.Should().NotBeNull();
         entitiesPostInsert.Count.Should().Be(1);
@@ -187,7 +266,7 @@ public class RepositoryShould : RepositoryTestFixture
         await insertAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(nonEmptyInsertCount);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(nonEmptyInsertCount);
         where.Should().NotThrow();
         entitiesPostInsert.Should().NotBeNull();
         if (!expectedResult)
@@ -228,7 +307,7 @@ public class RepositoryShould : RepositoryTestFixture
         await insertAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(expectedEntitiesPostInsert.Count > 0));
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
         where.Should().NotThrow();
         entitiesPostInsert.Should().NotBeNull();
         entitiesPostInsert.Should().NotBeSameAs(expectedEntitiesPostInsert);
@@ -256,7 +335,7 @@ public class RepositoryShould : RepositoryTestFixture
             resultShould.NotBeSameAs(expectedResult);
         }
         resultShould.BeEquivalentTo(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
     }
 
 
@@ -282,7 +361,7 @@ public class RepositoryShould : RepositoryTestFixture
         await getByIdAsync.Should().NotThrowAsync();
         result.Should().NotBeSameAs(expectedResult);
         result.Should().BeEquivalentTo(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
     }
 
     [TestCaseShift(3)]
@@ -304,7 +383,7 @@ public class RepositoryShould : RepositoryTestFixture
         await readOrDefaultAsync.Should().NotThrowAsync();
         result.Should().NotBeSameAs(expectedEntitiesToMatch);
         result.Should().BeEquivalentTo(expectedEntitiesToMatch);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
     }
 
     [TestCase(false)]
@@ -328,7 +407,7 @@ public class RepositoryShould : RepositoryTestFixture
         // Assert
         await updateAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
         get.Should().NotThrow();
         var entityPostUpdateShould = entityPostUpdate.Should();
         if (doesExist)
@@ -352,7 +431,7 @@ public class RepositoryShould : RepositoryTestFixture
 
         var expectedEntitiesPostUpdate = RepositoryEntities.OrderBy(entity => entity.Id).ToList();
         List<MockDataType1>? entitiesPostUpdate = null;
-        var expectedResult = MockDataContext.State.SaveChangesAsyncReturnValue > 0;
+        var expectedResult = Convert.ToBoolean(MockDataContext.State.SaveChangesAsyncReturnValue);
         bool? result = null;
 
         // Act (define)
@@ -365,7 +444,7 @@ public class RepositoryShould : RepositoryTestFixture
         // Assert
         await updateAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(Convert.ToInt32(expectedResult));
         MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(expectedResult));
         where.Should().NotThrow();
         entitiesPostUpdate.Should().NotBeSameAs(expectedEntitiesPostUpdate);
@@ -382,7 +461,9 @@ public class RepositoryShould : RepositoryTestFixture
             .ForEach(index => entitiesToUpdate[index] = existingEntities[index]);
         entitiesToUpdate.ForEach(entity => entity.Name = Create<string>());
 
-        MockDataContext.State.SaveChangesAsyncReturnValue = Convert.ToInt32(doAllExist);
+        var doAnyExist = doesOneExist || doManyExist || doAllExist;
+        var existenceCount = Convert.ToInt32(doAnyExist);
+        MockDataContext.State.SaveChangesAsyncReturnValue = existenceCount;
 
         var existingEntityIds = existingEntities.Select(existingEntity => existingEntity.Id).ToList();
         var expectedEntitiesPostUpdate = entitiesToUpdate
@@ -401,12 +482,12 @@ public class RepositoryShould : RepositoryTestFixture
 
         // Assert
         await updateAsync.Should().NotThrowAsync();
-        result.Should().Be(doAllExist);
-        VerifyDataContextCreationAndDisposalCalls();
+        result.Should().Be(doAnyExist);
+        VerifyDataContextCreationAndDisposalCalls(Convert.ToInt32(entitiesToUpdate.Count > 0));
         where.Should().NotThrow();
         entitiesPostUpdate.Should().NotBeSameAs(expectedEntitiesPostUpdate);
         entitiesPostUpdate.Should().BeEquivalentTo(expectedEntitiesPostUpdate);
-        MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(Convert.ToInt32(expectedEntitiesPostUpdate.Count > 0));
+        MockDataContext.State.SaveChangesAsyncCallCount.Should().Be(existenceCount);
     }
 
 
@@ -418,6 +499,7 @@ public class RepositoryShould : RepositoryTestFixture
         var originalEntity = RepositoryEntities.First();
         var updatedNameValue = Create<string>();
         originalEntity.Name = updatedNameValue;
+        
         var entityToUpdate = doesExist ? originalEntity : Create<MockDataType1>();
         Expression<Func<MockDataType1, string?>> updateNameExpression = entity => entity.Name;
         MockDataContext.State.SaveChangesAsyncReturnValue = Convert.ToInt32(doesExist);
@@ -433,7 +515,7 @@ public class RepositoryShould : RepositoryTestFixture
         // Assert
         await updateAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
-        VerifyDataContextCreationAndDisposalCalls();
+        VerifyDataContextCreationAndDisposalCalls(1);
         get.Should().NotThrow();
         var entityPostUpdateShould = entityPostUpdate.Should();
         if (doesExist)
