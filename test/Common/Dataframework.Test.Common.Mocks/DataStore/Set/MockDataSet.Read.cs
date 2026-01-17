@@ -10,11 +10,8 @@ public partial class MockDataSet<TEntity> where TEntity : class
             .CreateMockDataSourceBinding<TEntity>(nameof(MockDataSource.Get), IsVoidParameterizedSignature)
             .Invoke(MockDataSource, []) as IEnumerable<TEntity> ?? []).AsQueryable();
     }
-
-    public Task<int> CountAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    
+    public Task<int> CountAsync(CancellationToken cancellationToken) => CountAsync(_ => true, cancellationToken);
 
     public Task<int> CountAsync(Expression<Func<TEntity, bool>> expression, CancellationToken cancellationToken)
     {

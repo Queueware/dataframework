@@ -6,9 +6,10 @@ namespace Queueware.Dataframework.Infrastructure.Repositories;
 public partial class Repository<TId, TEntity, TDataContext>
 {
     /// <inheritdoc />
-    public Task<int> CountAsync(CancellationToken cancellationToken)
+    public async Task<int> CountAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        using var dataContext = _dataContext();
+        return await dataContext.Set<TEntity>().CountAsync(cancellationToken);
     }
 
     /// <inheritdoc />
