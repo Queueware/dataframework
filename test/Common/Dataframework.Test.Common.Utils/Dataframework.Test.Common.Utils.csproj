@@ -6,9 +6,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="AutoFixture" Version="5.0.0-preview0012" />
-      <PackageReference Include="FluentAssertions" Version="8.8.0" />
-    </ItemGroup>
-
 </Project>

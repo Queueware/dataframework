@@ -7,8 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutoFixture" />
-      <PackageReference Include="FluentAssertions" />
+      <ProjectReference Include="..\Dataframework.Abstractions.Primitives\Dataframework.Abstractions.Primitives.csproj" />
     </ItemGroup>
 
 </Project>

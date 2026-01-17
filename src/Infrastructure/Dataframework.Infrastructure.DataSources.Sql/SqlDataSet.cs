@@ -65,6 +65,17 @@ public class SqlDataSet<TEntity>(DbSet<TEntity> dbSet) : IDataSet<TEntity> where
     }
 
     /// <summary>
+    /// Returns the total number of entities.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// A token to observe while waiting for the operation to complete.
+    /// </param>
+    /// <returns>
+    /// Returns the total number of entities.
+    /// </returns>
+    public Task<int> CountAsync(CancellationToken cancellationToken) => dbSet.CountAsync(cancellationToken);
+
+    /// <summary>
     /// Returns the number of entities that satisfy the specified predicate.
     /// </summary>
     /// <param name="expression">

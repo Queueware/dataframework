@@ -9,17 +9,17 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Abstractions\Dataframework.Abstractions.Primitives\Dataframework.Abstractions.Primitives.csproj" />
       <ProjectReference Include="..\..\src\Infrastructure\Dataframework.Infrastructure.Primitives\Dataframework.Infrastructure.Primitives.csproj" />
+      <ProjectReference Include="..\..\src\Infrastructure\Dataframework.Infrastructure.Repositories\Dataframework.Infrastructure.Repositories.csproj" />
+      <ProjectReference Include="..\Common\Dataframework.Test.Common.Attributes\Dataframework.Test.Common.Attributes.csproj" />
+      <ProjectReference Include="..\Common\Dataframework.Test.Common.Mocks\Dataframework.Test.Common.Mocks.csproj" />
+      <ProjectReference Include="..\Common\Dataframework.Test.Common.Utils\Dataframework.Test.Common.Utils.csproj" />
       <ProjectReference Include="..\Common\Dataframework.Test.Common\Dataframework.Test.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-      <PackageReference Include="NUnit" Version="4.4.0" />
-      <PackageReference Include="NUnit3TestAdapter" Version="6.0.1" />
+      <PackageReference Include="FluentAssertions" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" />
+      <PackageReference Include="NUnit" />
+      <PackageReference Include="NUnit3TestAdapter" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Infrastructure\" />
-    </ItemGroup>
-
 </Project>
