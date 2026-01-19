@@ -9,9 +9,10 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
-
+    
     <ItemGroup>
-      <ProjectReference Include="..\..\Abstractions\Dataframework.Abstractions.Primitives\Dataframework.Abstractions.Primitives.csproj" />
+      <ProjectReference Include="..\..\Abstractions\Dataframework.Abstractions.Repositories\Dataframework.Abstractions.Repositories.csproj" />
+      <ProjectReference Include="..\..\Abstractions\DataSources\Dataframework.Abstractions.DataSources\Dataframework.Abstractions.DataSources.csproj" />
     </ItemGroup>
 
 </Project>

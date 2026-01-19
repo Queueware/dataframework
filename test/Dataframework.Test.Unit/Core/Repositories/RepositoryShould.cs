@@ -6,7 +6,7 @@ using Queueware.Dataframework.Test.Common.Attributes.NUnit;
 using Queueware.Dataframework.Test.Common.Utils;
 using Queueware.Dataframework.Test.Unit.Test.Common.Mocks;
 
-namespace Queueware.Dataframework.Test.Unit.Infrastructure.Infrastructure.Repositories;
+namespace Queueware.Dataframework.Test.Unit.Core.Repositories;
 
 [TestFixture]
 public class RepositoryShould : RepositoryTestFixture

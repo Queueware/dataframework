@@ -1,6 +1,6 @@
 using Queueware.Dataframework.Abstractions.DataSources;
 
-namespace Queueware.Dataframework.Infrastructure.Repositories;
+namespace Queueware.Dataframework.Core.Repositories;
 
 public partial class Repository<TId, TEntity, TDataContext>
 {
@@ -13,7 +13,7 @@ public partial class Repository<TId, TEntity, TDataContext>
     /// <inheritdoc />
     public Task<bool> DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
     {
-        var ids = entities.Select(entity => entity.Id);
+        var ids = entities.Select<TEntity, TId>(entity => entity.Id);
         return DeleteAsync(ids, cancellationToken);
     }
 

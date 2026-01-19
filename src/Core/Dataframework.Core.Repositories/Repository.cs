@@ -1,9 +1,8 @@
-﻿using System.Linq.Expressions;
-using Queueware.Dataframework.Abstractions.DataSources;
+﻿using Queueware.Dataframework.Abstractions.DataSources;
 using Queueware.Dataframework.Abstractions.Primitives;
 using Queueware.Dataframework.Abstractions.Repositories;
 
-namespace Queueware.Dataframework.Infrastructure.Repositories;
+namespace Queueware.Dataframework.Core.Repositories;
 
 /// <inheritdoc />
 public partial class Repository<TId, TEntity, TDataContext>(IDataContextFactory<TDataContext> dataContextFactory)

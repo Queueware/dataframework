@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Queueware.Dataframework.Abstractions.DataSources;
 
-namespace Queueware.Dataframework.Infrastructure.Repositories;
+namespace Queueware.Dataframework.Core.Repositories;
 
 public partial class Repository<TId, TEntity, TDataContext>
 {
@@ -51,7 +51,7 @@ public partial class Repository<TId, TEntity, TDataContext>
         var areEntitiesUpdated = false;
         
         var existingIds = await FindExistingIdsAsync(dataContext, entities, cancellationToken);
-        var existingEntitiesToUpdate = entities.Where(entity => existingIds.Contains(entity.Id)).ToList();
+        var existingEntitiesToUpdate = entities.Where(entity => Enumerable.Contains<TId>(existingIds, entity.Id)).ToList();
 
         if (existingEntitiesToUpdate.Count > 0)
         {

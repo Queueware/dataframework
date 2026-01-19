@@ -1,7 +1,7 @@
-using Queueware.Dataframework.Abstractions.DataSources;
 using System.Linq.Expressions;
+using Queueware.Dataframework.Abstractions.DataSources;
 
-namespace Queueware.Dataframework.Infrastructure.Repositories;
+namespace Queueware.Dataframework.Core.Repositories;
 
 public partial class Repository<TId, TEntity, TDataContext>
 {
@@ -52,10 +52,10 @@ public partial class Repository<TId, TEntity, TDataContext>
         CancellationToken cancellationToken)
     {
         var dataSet = dataContext.Set<TEntity>();
-        var ids = entities.Select(entity => entity.Id);
+        var ids = entities.Select<TEntity, TId>(entity => entity.Id);
         
         return (await dataSet.FindAsync(entity => ids.Contains(entity.Id), cancellationToken))
-            .Select(entity => entity.Id)
+            .Select<TEntity, TId>(entity => entity.Id)
             .ToList();
     }
 }
