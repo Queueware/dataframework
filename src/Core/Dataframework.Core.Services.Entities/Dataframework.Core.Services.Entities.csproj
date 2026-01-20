@@ -9,5 +9,9 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\Abstractions\Dataframework.Abstractions.Services.Entities\Dataframework.Abstractions.Services.Entities.csproj" />
+    </ItemGroup>
 
 </Project>
