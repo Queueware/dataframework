@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FluentAssertions;
 using LinqKit;
 using Moq;
@@ -390,14 +391,15 @@ public class EntityServiceShould : EntityServiceTestFixture
     {
         // Arrange
         var entity= Entities.First();
+        IEnumerable<MockDataType1> entityArgument = [entity];
         entity.Id = isNew ? null! : Create<string>();
         var entityToSave = isNull ? null! : entity;
         
         MockRepository
-            .Setup(repository => repository.InsertAsync(It.IsAny<MockDataType1>(), CancellationToken))
+            .Setup(repository => repository.InsertAsync(entityArgument, CancellationToken))
             .ReturnsAsync(isSaved);
         MockRepository
-            .Setup(repository => repository.UpdateAsync(It.IsAny<MockDataType1>(), CancellationToken))
+            .Setup(repository => repository.UpdateAsync(entityArgument, CancellationToken))
             .ReturnsAsync(isSaved);
             
         bool? result = null;
@@ -412,11 +414,13 @@ public class EntityServiceShould : EntityServiceTestFixture
         {
             if (isNew)
             {
-                MockRepository.Verify(repository => repository.InsertAsync(entityToSave, CancellationToken), Times.Once);
+                MockRepository.Verify(repository => repository.InsertAsync(entityArgument, CancellationToken),
+                    Times.Once);
             }
             else
             {
-                MockRepository.Verify(repository => repository.UpdateAsync(entityToSave, CancellationToken));
+                MockRepository.Verify(repository => repository.UpdateAsync(entityArgument, CancellationToken),
+                    Times.Once);
             }
         }
         MockRepository.VerifyNoOtherCalls();
