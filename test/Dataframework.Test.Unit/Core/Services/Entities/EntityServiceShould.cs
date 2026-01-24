@@ -94,7 +94,7 @@ public class EntityServiceShould : EntityServiceTestFixture
     {
         // Arrange
         var ids = TestArrangementHelper.GetRangeFrom(Entities, isOne, isMany, isAll).Select(entity => entity.Id);
-        var isEmpty = isOne || isMany || isAll;
+        var isEmpty = !(isOne || isMany || isAll);
         var expectedResult = !isEmpty;
         bool? result = null;
         
@@ -123,9 +123,8 @@ public class EntityServiceShould : EntityServiceTestFixture
         var maxIndex = isOneNull ? 1 : areManyNull ? ids.Count / 2 : areAllNull ? ids.Count : 0;
         Enumerable.Range(0, maxIndex).ForEach(index => ids[index] = null!);
         var expectedIdsArgument = ids.Where(id => id != null!);
-        
-        var isEmpty = isOneNull || areManyNull || areAllNull;
-        var expectedResult = !isEmpty;
+
+        var expectedResult = !areAllNull;
         bool? result = null;
         
         MockRepository
@@ -138,7 +137,7 @@ public class EntityServiceShould : EntityServiceTestFixture
         // Assert
         await deleteAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
-        if (!isEmpty)
+        if (expectedResult)
         {
             MockRepository.Verify(repository => repository.DeleteAsync(expectedIdsArgument, CancellationToken),
                 Times.Once);
@@ -176,7 +175,7 @@ public class EntityServiceShould : EntityServiceTestFixture
     {
         // Arrange
         var entitiesToRemove = TestArrangementHelper.GetRangeFrom(Entities, isOne, isMany, isAll).ToList();
-        var isEmpty = isOne || isMany || isAll;
+        var isEmpty = !(isOne || isMany || isAll);
         var expectedResult = !isEmpty;
         bool? result = null;
         
@@ -205,9 +204,8 @@ public class EntityServiceShould : EntityServiceTestFixture
         var maxIndex = isOneNull ? 1 : areManyNull ? entitiesToRemove.Count / 2 : areAllNull ? entitiesToRemove.Count : 0;
         Enumerable.Range(0, maxIndex).ForEach(index => entitiesToRemove[index] = null!);
         var expectedEntitiesArgument = entitiesToRemove.Where(id => id != null!);
-        
-        var isEmpty = isOneNull || areManyNull || areAllNull;
-        var expectedResult = !isEmpty;
+
+        var expectedResult = !areAllNull;
         bool? result = null;
         
         MockRepository
@@ -220,7 +218,7 @@ public class EntityServiceShould : EntityServiceTestFixture
         // Assert
         await deleteAsync.Should().NotThrowAsync();
         result.Should().Be(expectedResult);
-        if (!isEmpty)
+        if (expectedResult)
         {
             MockRepository.Verify(repository => repository.DeleteAsync(expectedEntitiesArgument, CancellationToken), Times.Once);
         }
@@ -238,7 +236,8 @@ public class EntityServiceShould : EntityServiceTestFixture
         MockRepository
             .Setup(repository => repository.FirstOrDefaultAsync(expression, CancellationToken))
             .ReturnsAsync(entityFound);
-        
+
+        var expectedResult = isFound && !isExpressionNull ? entityFound : null;
         MockDataType1? result = null;
 
         // Act (define)
@@ -246,7 +245,7 @@ public class EntityServiceShould : EntityServiceTestFixture
 
         // Assert
         await firstOrDefaultAsync.Should().NotThrowAsync();
-        result.Should().Be(isFound);
+        result.Should().Be(expectedResult);
         if (!isExpressionNull)
         {
             MockRepository.Verify(repository => repository.FirstOrDefaultAsync(expression, CancellationToken),
@@ -332,12 +331,13 @@ public class EntityServiceShould : EntityServiceTestFixture
         // Arrange
         var allEntityIds = Entities.Select(entity => entity.Id).ToList();
         var ids = TestArrangementHelper.GetRangeFrom(allEntityIds, isOne, isMany, isAll).ToList();
-        var isEmpty = isOne || isMany || isAll;
-        var expectedResult = Entities;
+        var isEmpty = !(isOne || isMany || isAll);
+        var expectedResult = Entities.Where(entity => ids.Contains(entity.Id)).ToList();
+        List<MockDataType1>? result = null;
+        
         MockRepository
             .Setup(repository => repository.GetByIdAsync(ids, CancellationToken))
             .ReturnsAsync(expectedResult);
-        List<MockDataType1>? result = null;
 
         // Act (define)
         var getAsync = async () => result = (await EntityService.GetAsync(ids, CancellationToken)).ToList();
@@ -361,7 +361,7 @@ public class EntityServiceShould : EntityServiceTestFixture
         Enumerable.Range(0, maxIndex).ForEach(index => ids[index] = null!);
         
         var expectedIdsArgument = ids.Where(id => id != null!).ToList();
-        var expectedResult = Entities;
+        var expectedResult = Entities.Where(entity => expectedIdsArgument.Contains(entity.Id)).ToList();
         List<MockDataType1>? result = null;
         
         MockRepository
@@ -429,7 +429,7 @@ public class EntityServiceShould : EntityServiceTestFixture
         var entitiesToSave = TestArrangementHelper.GetRangeFrom(Entities, isOne, isMany, isAll).ToList();
         entitiesToSave.ForEach(entity => entity.Id = null!);
         
-        var isEmpty = isOne || isMany || isAll;
+        var isEmpty = !(isOne || isMany || isAll);
         var expectedResult = !isEmpty;
         bool? result = null;
         MockRepository
@@ -495,7 +495,7 @@ public class EntityServiceShould : EntityServiceTestFixture
         var expectedEntitiesArgument = entitiesToSave.Where(entity => entity != null!).ToList();
         var isEmpty = expectedEntitiesArgument.Count == 0;
 
-        var expectedResult = !isEmpty;
+        var expectedResult = !isAll;
         bool? result = null;
         MockRepository
             .Setup(repository => repository.UpdateAsync(expectedEntitiesArgument, CancellationToken))
@@ -547,7 +547,7 @@ public class EntityServiceShould : EntityServiceTestFixture
         // Act (define)
         var saveAsync = async () =>
         {
-            await EntityService.SaveAsync(entity, SetStringExpression, value, CancellationToken);
+            result = await EntityService.SaveAsync(entity, SetStringExpression, value, CancellationToken);
         };
 
         // Assert
